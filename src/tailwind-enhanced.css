@@ -1,0 +1,16 @@
+/* tailwind-enhanced.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Additional Custom Utilities */
+.card-hover {
+  @apply transition-transform hover:scale-[1.01] hover:shadow-xl;
+}
+.btn-gradient {
+  @apply bg-gradient-to-r from-cyan-600 to-sky-500 text-white px-4 py-2 rounded-lg shadow hover:from-cyan-700 hover:to-sky-600 transition;
+}
+.blur-bg {
+  @apply absolute top-0 left-0 -z-10 w-full h-full;
+  filter: blur(100px);
+}
