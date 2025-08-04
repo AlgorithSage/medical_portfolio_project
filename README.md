@@ -1,4 +1,31 @@
-# Getting Started with Create React App
+Project: Smart Medical Portfolio – A Step Toward AI-Driven Healthcare
+
+The Smart Medical Portfolio is an advanced web-based platform developed using React for the frontend and Firebase for backend services and authentication. The system is designed to digitally store and manage a patient’s complete medical history, including doctor visits, diagnoses, prescriptions, lab reports, imaging results, and medication records.
+
+The goal is to create a centralized, secure, and accessible portal where patients and healthcare professionals can interact seamlessly. Doctors can easily view, update, and monitor patient records, improving diagnosis efficiency and care personalization. The platform supports multi-user roles (patients and doctors) and is built with a scalable and privacy-focused architecture.
+
+Core Functionalities (Current - Frontend Only):
+
+1) Patient dashboard with access to health records, prescriptions, and test results
+2) Doctor interface to view and manage patient data
+3) Appointment section, medication logs, and document upload UI
+4) Clean, responsive UI/UX with a focus on ease of navigation and accessibility
+
+AI/ML Features (In Development):
+
+1) Disease trend prediction using historical patient data and time-series analysis
+2) Generative AI medical summarization of large patient histories or uploaded documents
+3) Pharmaceutical resource optimization using usage pattern mining
+4) Outbreak modeling and early detection from aggregate patient data (synthetic & anonymized)
+5) These AI-driven modules will be integrated using Python-based ML pipelines, trained on synthetic data during development to ensure patient privacy and data security.
+
+Tech Stack:
+
+1) Frontend: React.js, Tailwind CSS
+2) Backend/Database: Firebase Firestore, Firebase Auth
+3) Future ML Stack: Python, Pandas, Scikit-learn, TensorFlow, OpenAI APIs
+
+This project serves as a prototype for a full-fledged AI-powered health management system. Currently, it features only the static UI components to demonstrate the vision and planned functionality. Future phases will integrate real-time ML models, encrypted medical storage, and actionable insights for both patients and providers.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
