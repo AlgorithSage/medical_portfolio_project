@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-// --- UPDATED: Added all necessary auth functions ---
 import { 
     getAuth, 
     onAuthStateChanged, 
@@ -13,9 +12,15 @@ import {
 import { getFirestore } from 'firebase/firestore';
 import { AnimatePresence } from 'framer-motion';
 
+// Import all the components, including the new pages
 import Sidebar from './components/Sidebar';
 import MedicalPortfolio from './components/MedicalPortfolio';
 import AuthModals from './components/AuthModals';
+import AllRecords from './components/AllRecords';
+import Appointments from './components/Appointments';
+import Medications from './components/Medications';
+import Settings from './components/Settings';
+import CureStat from './components/CureStat'; // Import the new CureStat component
 
 const firebaseConfig = {
     apiKey: "AIzaSyDddK-YS9PWvU9DDuCwNUdPZ-Vi6PwqtQ4",
@@ -30,7 +35,6 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = firebaseConfig.appId;
-// --- NEW: Initialize Google Provider ---
 const googleProvider = new GoogleAuthProvider();
 
 const formatDate = (date) => {
@@ -51,56 +55,67 @@ export default function App() {
     const [loading, setLoading] = useState(true);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authError, setAuthError] = useState(null);
+    
+    // This new state manages which page is currently displayed
+    const [activeView, setActiveView] = useState('Dashboard');
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
             setLoading(false);
-            if(currentUser) {
-                setIsAuthModalOpen(false); 
-            }
         });
         return () => unsubscribe();
     }, []);
 
-    // --- UPDATED: This now uses REAL Firebase login ---
     const handleLogin = async (email, password) => {
         setAuthError(null);
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            // The onAuthStateChanged listener will handle setting the user and closing the modal
         } catch (error) {
-            console.error("Login Error:", error.message);
             setAuthError(error.message);
         }
     };
 
-    // --- UPDATED: This now uses REAL Firebase sign up ---
     const handleSignUp = async (email, password) => {
         setAuthError(null);
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            // The onAuthStateChanged listener will handle setting the user and closing the modal
         } catch (error) {
-            console.error("Sign Up Error:", error.message);
             setAuthError(error.message);
         }
     };
     
-    // --- NEW: This handles Google Sign-In ---
     const handleGoogleSignIn = async () => {
         setAuthError(null);
         try {
             await signInWithPopup(auth, googleProvider);
         } catch (error) {
-            console.error("Google Sign-In Error:", error.message);
             setAuthError(error.message);
         }
     };
     
-    // --- UPDATED: This now uses REAL Firebase logout ---
     const handleLogout = () => {
-        signOut(auth).catch(error => console.error("Logout Error:", error));
+        signOut(auth).catch(error => setAuthError(error.message));
+    };
+
+    // This function renders the correct page based on the activeView state
+    const renderActiveView = () => {
+        switch (activeView) {
+            case 'Dashboard':
+                return <MedicalPortfolio user={user} db={db} appId={appId} formatDate={formatDate} capitalize={capitalize} onLogout={handleLogout} onLoginClick={() => setIsAuthModalOpen(true)} />;
+            case 'All Records':
+                return <AllRecords />;
+            case 'Appointments':
+                return <Appointments />;
+            case 'Medications':
+                return <Medications />;
+            case 'Cure Stat':
+                return <CureStat />;
+            case 'Settings':
+                return <Settings />;
+            default:
+                return <MedicalPortfolio user={user} db={db} appId={appId} formatDate={formatDate} capitalize={capitalize} onLogout={handleLogout} onLoginClick={() => setIsAuthModalOpen(true)} />;
+        }
     };
 
     if (loading) {
@@ -110,34 +125,30 @@ export default function App() {
     return (
         <div className="min-h-screen font-sans text-slate-200 relative isolate bg-slate-900">
             <div className="flex">
-                <Sidebar />
+                <Sidebar 
+                    activeView={activeView} 
+                    onNavigate={setActiveView} 
+                />
                 <main className="flex-1 bg-slate-950">
-                    <MedicalPortfolio 
-                        user={user}
-                        db={db} 
-                        appId={appId} 
-                        formatDate={formatDate} 
-                        capitalize={capitalize} 
-                        onLogout={handleLogout}
-                        onLoginClick={() => {
-                            setIsAuthModalOpen(true);
-                            setAuthError(null); // Clear previous errors when opening modal
-                        }}
-                    />
+                    {renderActiveView()}
                 </main>
             </div>
             <AnimatePresence>
                 {isAuthModalOpen && (
                     <AuthModals 
+                        user={user}
+                        onLogout={handleLogout}
                         onClose={() => setIsAuthModalOpen(false)}
                         onLogin={handleLogin}
                         onSignUp={handleSignUp}
-                        onGoogleSignIn={handleGoogleSignIn} // --- NEW: Pass Google handler
+                        onGoogleSignIn={handleGoogleSignIn}
                         capitalize={capitalize}
-                        error={authError} // --- NEW: Pass error to modal
+                        error={authError}
                     />
                 )}
             </AnimatePresence>
         </div>
     );
 }
+
+

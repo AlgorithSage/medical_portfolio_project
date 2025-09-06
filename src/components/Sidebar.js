@@ -1,12 +1,14 @@
 import React from 'react';
-import { LayoutDashboard, FileText, Calendar, Pill, Settings, HeartPulse } from 'lucide-react';
+import { LayoutDashboard, FileText, Calendar, Pill, Settings, HeartPulse, Activity } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ activeView, onNavigate }) => {
+    // --- ADDED "Cure Stat" to the navigation items ---
     const navItems = [
         { icon: <LayoutDashboard size={20} />, name: 'Dashboard' },
         { icon: <FileText size={20} />, name: 'All Records' },
         { icon: <Calendar size={20} />, name: 'Appointments' },
         { icon: <Pill size={20} />, name: 'Medications' },
+        { icon: <Activity size={20} />, name: 'Cure Stat' }, // New Item
         { icon: <Settings size={20} />, name: 'Settings' },
     ];
 
@@ -20,12 +22,19 @@ const Sidebar = () => {
             </div>
             <nav className="p-4">
                 <ul>
-                    {navItems.map((item, index) => (
+                    {navItems.map((item) => (
                         <li key={item.name}>
-                            <a href="#" className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-slate-300 hover:bg-slate-800 hover:text-white transition-colors ${index === 0 ? 'bg-slate-800 text-white' : ''}`}>
+                            <button 
+                                onClick={() => onNavigate(item.name)} 
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                                    activeView === item.name 
+                                    ? 'bg-slate-800 text-white' 
+                                    : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                }`}
+                            >
                                 {item.icon}
                                 <span className="font-medium">{item.name}</span>
-                            </a>
+                            </button>
                         </li>
                     ))}
                 </ul>
