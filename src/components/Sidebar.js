@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, FileText, Calendar, Pill, Settings, HeartPulse, Bot, Activity } from 'lucide-react';
+import { LayoutDashboard, FileText, Calendar, Pill, Settings, HeartPulse, Bot, Activity, X } from 'lucide-react';
 
-const Sidebar = ({ activeView, onNavigate }) => {
+const Sidebar = ({ activeView, onNavigate, isOpen, onClose }) => {
     const navItems = [
         { name: 'Dashboard' },
         { name: 'All Records' },
@@ -26,35 +26,56 @@ const Sidebar = ({ activeView, onNavigate }) => {
     };
 
     return (
-        <aside className="w-64 flex-shrink-0 bg-slate-900 border-r border-slate-800 h-screen sticky top-0">
-            <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-                <div className="bg-sky-500 p-2 rounded-lg">
-                    <HeartPulse size={24} className="text-white" />
+        <>
+            {/* Mobile Overlay: Appears behind the drawer and closes it when clicked */}
+            <div 
+                className={`fixed inset-0 bg-black/60 z-30 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={onClose}
+            ></div>
+
+            {/* Sidebar with responsive classes */}
+            <aside 
+                className={`w-64 flex-shrink-0 bg-slate-900 border-r border-slate-800 h-screen fixed top-0 left-0 z-40 
+                           lg:sticky lg:translate-x-0 transition-transform duration-300 ease-in-out
+                           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`} // Slides in and out on mobile
+            >
+                <div className="p-6 flex items-center justify-between gap-3 border-b border-slate-800">
+                    <div className='flex items-center gap-3'>
+                        <div className="bg-sky-500 p-2 rounded-lg">
+                            <HeartPulse size={24} className="text-white" />
+                        </div>
+                        <h1 className="text-xl font-bold text-white">Curebird</h1>
+                    </div>
+                    {/* Mobile Close Button */}
+                    <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white">
+                        <X size={24} />
+                    </button>
                 </div>
-                <h1 className="text-xl font-bold text-white">Curebird</h1>
-            </div>
-            <nav className="p-4">
-                <ul>
-                    {navItems.map(item => (
-                        <li key={item.name}>
-                            <button 
-                                onClick={() => onNavigate(item.name)} 
-                                className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
-                                    activeView === item.name 
-                                        ? 'bg-slate-800 text-white' 
-                                        : 'text-slate-300 hover:bg-slate-800 hover:text-white'
-                                }`}
-                            >
-                                {getIcon(item.name)}
-                                <span className="font-medium">{item.name}</span>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            </nav>
-        </aside>
+                <nav className="p-4">
+                    <ul>
+                        {navItems.map(item => (
+                            <li key={item.name}>
+                                <button 
+                                    onClick={() => {
+                                        onNavigate(item.name);
+                                        onClose(); // Close sidebar on mobile after navigation
+                                    }} 
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg text-left transition-colors ${
+                                        activeView === item.name 
+                                            ? 'bg-slate-800 text-white' 
+                                            : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                                    }`}
+                                >
+                                    {getIcon(item.name)}
+                                    <span className="font-medium">{item.name}</span>
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+            </aside>
+        </>
     );
 };
 
 export default Sidebar;
-

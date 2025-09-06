@@ -13,7 +13,7 @@ import Appointments from './components/Appointments';
 import Medications from './components/Medications';
 import Settings from './components/Settings';
 import CureStat from './components/CureStat';
-import CureAnalyzer from './components/CureAnalyzer'; // This line was missing
+import CureAnalyzer from './components/CureAnalyzer';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDddK-YS9PWvU9DDuCwNUdPZ-Vi6PwqtQ4",
@@ -40,6 +40,9 @@ export default function App() {
     const [authError, setAuthError] = useState(null);
     const [activeView, setActiveView] = useState('Dashboard');
 
+    // State to manage the mobile sidebar visibility
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, currentUser => {
             setUser(currentUser);
@@ -53,41 +56,38 @@ export default function App() {
         try { await signInWithEmailAndPassword(auth, email, password); } 
         catch (error) { setAuthError(error.message); }
     };
-
     const handleSignUp = async (email, password) => {
         setAuthError(null);
         try { await createUserWithEmailAndPassword(auth, email, password); } 
         catch (error) { setAuthError(error.message); }
     };
-    
     const handleGoogleSignIn = async () => {
         setAuthError(null);
         try { await signInWithPopup(auth, googleProvider); } 
         catch (error) { setAuthError(error.message); }
     };
-    
     const handleLogout = () => {
         signOut(auth).catch(error => setAuthError(error.message));
     };
 
+    // This function now passes the sidebar toggle handler to every page
     const renderActiveView = () => {
+        const pageProps = {
+            user, db, appId, formatDate, capitalize, 
+            onLogout: handleLogout,
+            onLoginClick: () => setIsAuthModalOpen(true),
+            onToggleSidebar: () => setIsSidebarOpen(!isSidebarOpen) // Pass the toggle function
+        };
+
         switch (activeView) {
-            case 'Dashboard':
-                return <MedicalPortfolio user={user} db={db} appId={appId} formatDate={formatDate} capitalize={capitalize} onLogout={handleLogout} onLoginClick={() => setIsAuthModalOpen(true)} />;
-            case 'All Records':
-                return <AllRecords />;
-            case 'Appointments':
-                return <Appointments />;
-            case 'Medications':
-                return <Medications />;
-            case 'Cure Analyzer': // This case was missing
-                return <CureAnalyzer />;
-            case 'Cure Stat':
-                return <CureStat />;
-            case 'Settings':
-                return <Settings />;
-            default:
-                return <MedicalPortfolio user={user} db={db} appId={appId} formatDate={formatDate} capitalize={capitalize} onLogout={handleLogout} onLoginClick={() => setIsAuthModalOpen(true)} />;
+            case 'Dashboard': return <MedicalPortfolio {...pageProps} />;
+            case 'All Records': return <AllRecords {...pageProps} />;
+            case 'Appointments': return <Appointments {...pageProps} />;
+            case 'Medications': return <Medications {...pageProps} />;
+            case 'Cure Analyzer': return <CureAnalyzer {...pageProps} />;
+            case 'Cure Stat': return <CureStat {...pageProps} />;
+            case 'Settings': return <Settings {...pageProps} />;
+            default: return <MedicalPortfolio {...pageProps} />;
         }
     };
 
@@ -98,14 +98,27 @@ export default function App() {
     return (
         <div className="min-h-screen font-sans text-slate-200 relative isolate bg-slate-900">
             <div className="flex">
-                <Sidebar activeView={activeView} onNavigate={setActiveView} />
-                <main className="flex-1 bg-slate-950">
+                <Sidebar 
+                    activeView={activeView} 
+                    onNavigate={setActiveView}
+                    isOpen={isSidebarOpen} // Pass state to sidebar
+                    onClose={() => setIsSidebarOpen(false)} // Pass close function
+                />
+                <main className="flex-1 bg-slate-950 w-full min-w-0">
                     {renderActiveView()}
                 </main>
             </div>
             <AnimatePresence>
                 {isAuthModalOpen && (
-                    <AuthModals user={user} onLogout={handleLogout} onClose={() => setIsAuthModalOpen(false)} onLogin={handleLogin} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} capitalize={capitalize} error={authError} />
+                    <AuthModals 
+                        user={user} 
+                        onLogout={handleLogout}
+                        onClose={() => setIsAuthModalOpen(false)} 
+                        onLogin={handleLogin} 
+                        onSignUp={handleSignUp} 
+                        onGoogleSignIn={handleGoogleSignIn} 
+                        capitalize={capitalize} 
+                        error={authError} />
                 )}
             </AnimatePresence>
         </div>
