@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+// --- UPDATED: Added all necessary auth functions ---
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { AnimatePresence } from 'framer-motion';
 
@@ -8,24 +17,22 @@ import Sidebar from './components/Sidebar';
 import MedicalPortfolio from './components/MedicalPortfolio';
 import AuthModals from './components/AuthModals';
 
-// --- Firebase Configuration ---
 const firebaseConfig = {
-  apiKey: "AIzaSyC5HGK72mr-AfkMPZqYtIQe0UhIH4FbaMA",
-  authDomain: "my-medical-portfolio-df1d9.firebaseapp.com",
-  projectId: "my-medical-portfolio-df1d9",
-  storageBucket: "my-medical-portfolio-df1d9.appspot.com",
-  messagingSenderId: "614986646190",
-  appId: "1:614986646190:web:8f145884c24e34890da33f",
-  measurementId: "G-WNKGLGC5DD"
+    apiKey: "AIzaSyDddK-YS9PWvU9DDuCwNUdPZ-Vi6PwqtQ4",
+    authDomain: "curebird-2cb67.firebaseapp.com",
+    projectId: "curebird-2cb67",
+    storageBucket: "curebird-2cb67.firebasestorage.app",
+    messagingSenderId: "256974181423",
+    appId: "1:256974181423:web:fd2b7935a0f2c4128662da"
 };
 
-// --- Firebase Initialization ---
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 const appId = firebaseConfig.appId;
+// --- NEW: Initialize Google Provider ---
+const googleProvider = new GoogleAuthProvider();
 
-// --- Helper Functions ---
 const formatDate = (date) => {
     if (!date) return 'N/A';
     if (date.toDate) return date.toDate().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -39,13 +46,12 @@ const formatDate = (date) => {
 };
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ') : '');
 
-// --- Main App Component ---
 export default function App() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+    const [authError, setAuthError] = useState(null);
 
-    // This effect will run once to check the initial auth state
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
@@ -57,28 +63,44 @@ export default function App() {
         return () => unsubscribe();
     }, []);
 
-    // These functions are for demonstration and don't perform real auth
-    const handleLogin = (email, password) => {
-        console.log("Attempting to log in with:", email);
-        // In a real app, you would have: await signInWithEmailAndPassword(auth, email, password);
-        return new Promise((resolve) => setTimeout(() => {
-             setUser({ uid: 'demo-user' }); // Simulate a user object
-             resolve();
-        }, 1000));
+    // --- UPDATED: This now uses REAL Firebase login ---
+    const handleLogin = async (email, password) => {
+        setAuthError(null);
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            // The onAuthStateChanged listener will handle setting the user and closing the modal
+        } catch (error) {
+            console.error("Login Error:", error.message);
+            setAuthError(error.message);
+        }
     };
 
-    const handleSignUp = (email, password) => {
-        console.log("Attempting to sign up with:", email);
-        // In a real app, you would have: await createUserWithEmailAndPassword(auth, email, password);
-         return new Promise((resolve) => setTimeout(() => {
-             setUser({ uid: 'demo-user' }); // Simulate a user object
-             resolve();
-        }, 1000));
+    // --- UPDATED: This now uses REAL Firebase sign up ---
+    const handleSignUp = async (email, password) => {
+        setAuthError(null);
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            // The onAuthStateChanged listener will handle setting the user and closing the modal
+        } catch (error) {
+            console.error("Sign Up Error:", error.message);
+            setAuthError(error.message);
+        }
     };
     
+    // --- NEW: This handles Google Sign-In ---
+    const handleGoogleSignIn = async () => {
+        setAuthError(null);
+        try {
+            await signInWithPopup(auth, googleProvider);
+        } catch (error) {
+            console.error("Google Sign-In Error:", error.message);
+            setAuthError(error.message);
+        }
+    };
+    
+    // --- UPDATED: This now uses REAL Firebase logout ---
     const handleLogout = () => {
-        console.log("Logging out.");
-        setUser(null); // Simulate logout by clearing the user object
+        signOut(auth).catch(error => console.error("Logout Error:", error));
     };
 
     if (loading) {
@@ -97,7 +119,10 @@ export default function App() {
                         formatDate={formatDate} 
                         capitalize={capitalize} 
                         onLogout={handleLogout}
-                        onLoginClick={() => setIsAuthModalOpen(true)}
+                        onLoginClick={() => {
+                            setIsAuthModalOpen(true);
+                            setAuthError(null); // Clear previous errors when opening modal
+                        }}
                     />
                 </main>
             </div>
@@ -107,7 +132,9 @@ export default function App() {
                         onClose={() => setIsAuthModalOpen(false)}
                         onLogin={handleLogin}
                         onSignUp={handleSignUp}
+                        onGoogleSignIn={handleGoogleSignIn} // --- NEW: Pass Google handler
                         capitalize={capitalize}
+                        error={authError} // --- NEW: Pass error to modal
                     />
                 )}
             </AnimatePresence>

@@ -16,7 +16,7 @@ const Sidebar = () => {
                 <div className="bg-sky-500 p-2 rounded-lg">
                     <HeartPulse size={24} className="text-white" />
                 </div>
-                <h1 className="text-xl font-bold text-white">HealthFolio</h1>
+                <h1 className="text-xl font-bold text-white">Curebird</h1>
             </div>
             <nav className="p-4">
                 <ul>
