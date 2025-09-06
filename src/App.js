@@ -1,18 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { 
-    getAuth, 
-    onAuthStateChanged, 
-    signInWithEmailAndPassword, 
-    createUserWithEmailAndPassword, 
-    signOut,
-    GoogleAuthProvider,
-    signInWithPopup
-} from 'firebase/auth';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { AnimatePresence } from 'framer-motion';
 
-// Import all the components, including the new pages
+// Import all components
 import Sidebar from './components/Sidebar';
 import MedicalPortfolio from './components/MedicalPortfolio';
 import AuthModals from './components/AuthModals';
@@ -20,7 +12,8 @@ import AllRecords from './components/AllRecords';
 import Appointments from './components/Appointments';
 import Medications from './components/Medications';
 import Settings from './components/Settings';
-import CureStat from './components/CureStat'; // Import the new CureStat component
+import CureStat from './components/CureStat';
+import CureAnalyzer from './components/CureAnalyzer'; // This line was missing
 
 const firebaseConfig = {
     apiKey: "AIzaSyDddK-YS9PWvU9DDuCwNUdPZ-Vi6PwqtQ4",
@@ -37,17 +30,7 @@ const db = getFirestore(app);
 const appId = firebaseConfig.appId;
 const googleProvider = new GoogleAuthProvider();
 
-const formatDate = (date) => {
-    if (!date) return 'N/A';
-    if (date.toDate) return date.toDate().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-    try {
-        const d = new Date(date);
-        if (isNaN(d.getTime())) return 'Invalid Date';
-        return d.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
-    } catch (e) {
-        return 'Invalid Date';
-    }
-};
+const formatDate = (date) => date?.toDate ? date.toDate().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
 const capitalize = (s) => (s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ') : '');
 
 export default function App() {
@@ -55,12 +38,10 @@ export default function App() {
     const [loading, setLoading] = useState(true);
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authError, setAuthError] = useState(null);
-    
-    // This new state manages which page is currently displayed
     const [activeView, setActiveView] = useState('Dashboard');
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, currentUser => {
             setUser(currentUser);
             setLoading(false);
         });
@@ -69,36 +50,26 @@ export default function App() {
 
     const handleLogin = async (email, password) => {
         setAuthError(null);
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            setAuthError(error.message);
-        }
+        try { await signInWithEmailAndPassword(auth, email, password); } 
+        catch (error) { setAuthError(error.message); }
     };
 
     const handleSignUp = async (email, password) => {
         setAuthError(null);
-        try {
-            await createUserWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            setAuthError(error.message);
-        }
+        try { await createUserWithEmailAndPassword(auth, email, password); } 
+        catch (error) { setAuthError(error.message); }
     };
     
     const handleGoogleSignIn = async () => {
         setAuthError(null);
-        try {
-            await signInWithPopup(auth, googleProvider);
-        } catch (error) {
-            setAuthError(error.message);
-        }
+        try { await signInWithPopup(auth, googleProvider); } 
+        catch (error) { setAuthError(error.message); }
     };
     
     const handleLogout = () => {
         signOut(auth).catch(error => setAuthError(error.message));
     };
 
-    // This function renders the correct page based on the activeView state
     const renderActiveView = () => {
         switch (activeView) {
             case 'Dashboard':
@@ -109,6 +80,8 @@ export default function App() {
                 return <Appointments />;
             case 'Medications':
                 return <Medications />;
+            case 'Cure Analyzer': // This case was missing
+                return <CureAnalyzer />;
             case 'Cure Stat':
                 return <CureStat />;
             case 'Settings':
@@ -125,30 +98,17 @@ export default function App() {
     return (
         <div className="min-h-screen font-sans text-slate-200 relative isolate bg-slate-900">
             <div className="flex">
-                <Sidebar 
-                    activeView={activeView} 
-                    onNavigate={setActiveView} 
-                />
+                <Sidebar activeView={activeView} onNavigate={setActiveView} />
                 <main className="flex-1 bg-slate-950">
                     {renderActiveView()}
                 </main>
             </div>
             <AnimatePresence>
                 {isAuthModalOpen && (
-                    <AuthModals 
-                        user={user}
-                        onLogout={handleLogout}
-                        onClose={() => setIsAuthModalOpen(false)}
-                        onLogin={handleLogin}
-                        onSignUp={handleSignUp}
-                        onGoogleSignIn={handleGoogleSignIn}
-                        capitalize={capitalize}
-                        error={authError}
-                    />
+                    <AuthModals user={user} onLogout={handleLogout} onClose={() => setIsAuthModalOpen(false)} onLogin={handleLogin} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} capitalize={capitalize} error={authError} />
                 )}
             </AnimatePresence>
         </div>
     );
 }
-
 
