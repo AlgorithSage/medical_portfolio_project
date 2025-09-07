@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    signInWithEmailAndPassword, 
+    createUserWithEmailAndPassword, 
+    signOut,
+    GoogleAuthProvider,
+    signInWithPopup
+} from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { AnimatePresence } from 'framer-motion';
 
@@ -14,6 +22,7 @@ import Medications from './components/Medications';
 import Settings from './components/Settings';
 import CureStat from './components/CureStat';
 import CureAnalyzer from './components/CureAnalyzer';
+import LandingPage from './components/LandingPage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyDddK-YS9PWvU9DDuCwNUdPZ-Vi6PwqtQ4",
@@ -39,8 +48,6 @@ export default function App() {
     const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
     const [authError, setAuthError] = useState(null);
     const [activeView, setActiveView] = useState('Dashboard');
-
-    // State to manage the mobile sidebar visibility
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
@@ -70,13 +77,12 @@ export default function App() {
         signOut(auth).catch(error => setAuthError(error.message));
     };
 
-    // This function now passes the sidebar toggle handler to every page
     const renderActiveView = () => {
         const pageProps = {
             user, db, appId, formatDate, capitalize, 
-            onLogout: handleLogout,
+            onLogout: handleLogout, // --- THIS LINE HAS BEEN CORRECTED ---
             onLoginClick: () => setIsAuthModalOpen(true),
-            onToggleSidebar: () => setIsSidebarOpen(!isSidebarOpen) // Pass the toggle function
+            onToggleSidebar: () => setIsSidebarOpen(!isSidebarOpen)
         };
 
         switch (activeView) {
@@ -97,28 +103,25 @@ export default function App() {
 
     return (
         <div className="min-h-screen font-sans text-slate-200 relative isolate bg-slate-900">
-            <div className="flex">
-                <Sidebar 
-                    activeView={activeView} 
-                    onNavigate={setActiveView}
-                    isOpen={isSidebarOpen} // Pass state to sidebar
-                    onClose={() => setIsSidebarOpen(false)} // Pass close function
-                />
-                <main className="flex-1 bg-slate-950 w-full min-w-0">
-                    {renderActiveView()}
-                </main>
-            </div>
+            {user ? (
+                <div className="flex">
+                    <Sidebar 
+                        activeView={activeView} 
+                        onNavigate={setActiveView}
+                        isOpen={isSidebarOpen}
+                        onClose={() => setIsSidebarOpen(false)}
+                    />
+                    <main className="flex-1 bg-slate-950 w-full min-w-0">
+                        {renderActiveView()}
+                    </main>
+                </div>
+            ) : (
+                <LandingPage onLoginClick={() => setIsAuthModalOpen(true)} />
+            )}
+
             <AnimatePresence>
                 {isAuthModalOpen && (
-                    <AuthModals 
-                        user={user} 
-                        onLogout={handleLogout}
-                        onClose={() => setIsAuthModalOpen(false)} 
-                        onLogin={handleLogin} 
-                        onSignUp={handleSignUp} 
-                        onGoogleSignIn={handleGoogleSignIn} 
-                        capitalize={capitalize} 
-                        error={authError} />
+                    <AuthModals user={user} onLogout={handleLogout} onClose={() => setIsAuthModalOpen(false)} onLogin={handleLogin} onSignUp={handleSignUp} onGoogleSignIn={handleGoogleSignIn} capitalize={capitalize} error={authError} />
                 )}
             </AnimatePresence>
         </div>

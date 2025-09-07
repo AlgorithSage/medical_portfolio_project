@@ -31,3 +31,19 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background-color: #334155;
 }
+/* Add this to the bottom of src/index.css */
+@layer utilities {
+  @keyframes gradient-xy {
+    0%, 100% {
+      background-size: 400% 400%;
+      background-position: top center;
+    }
+    50% {
+      background-size: 200% 200%;
+      background-position: bottom center;
+    }
+  }
+  .animate-gradient-xy {
+    animation: gradient-xy 15s ease infinite;
+  }
+}
