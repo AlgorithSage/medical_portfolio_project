@@ -84,7 +84,7 @@ const AuthForm = ({ ctaText, activeTab, onSubmit, setEmail, setPassword }) => (
 
 const AuthModals = ({ onClose }) => {
     const [isLoginView, setIsLoginView] = useState(true);
-    const [activeTab, setActiveTab] = useState('patient');
+    const [activeTab, setActiveTab] = useState('user');
     
     // --- ADDED: State for form inputs and error messages ---
     const [email, setEmail] = useState('');
@@ -92,9 +92,7 @@ const AuthModals = ({ onClose }) => {
     const [error, setError] = useState('');
 
     const tabs = [
-        { id: 'patient', name: 'Patient', icon: <User size={20} /> },
-        { id: 'doctor', name: 'Doctor', icon: <Stethoscope size={20} /> },
-        { id: 'hospital', name: 'Hospital', icon: <Hospital size={20} /> },
+        { id: 'user', name: 'User', icon: <User size={20} /> },
     ];
 
     // --- ADDED: Handler for form submission ---
