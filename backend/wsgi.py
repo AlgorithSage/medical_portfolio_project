@@ -1,3 +1,4 @@
+<<<<<<< HEAD
     from app import create_app
     app = create_app()
     ```
@@ -16,3 +17,9 @@ Render deploys directly from a GitHub repository. If you haven't done so already
     git push -u origin main
     
 
+=======
+from backend.app import app as application
+
+if __name__ == "__main__":
+    application.run()
+>>>>>>> 6f70e1bce87324f6cd47a820999c312c3500f292
