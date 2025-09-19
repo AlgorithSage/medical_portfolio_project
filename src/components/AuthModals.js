@@ -15,12 +15,13 @@ import { User, Stethoscope, Hospital, X, ShieldAlert } from 'lucide-react'; // A
 // --- ADDED: Firebase Configuration ---
 // IMPORTANT: Replace this with your actual Firebase config object
 const firebaseConfig = {
-  apiKey: "AIzaSyDddK-YS9PWvU9DDuCwNUdPZ-Vi6PwqtQ4",
-  authDomain: "curebird-2cb67.firebaseapp.com",
-  projectId: "curebird-2cb67",
-  storageBucket: "curebird-2cb67.firebasestorage.app",
-  messagingSenderId: "256974181423",
-  appId: "1:256974181423:web:fd2b7935a0f2c4128662da"
+  apiKey: "AIzaSyC5HGK72mr-AfkMPZqYtIQe0UhIH4FbaMA",
+  authDomain: "my-medical-portfolio-df1d9.firebaseapp.com",
+  projectId: "my-medical-portfolio-df1d9",
+  storageBucket: "my-medical-portfolio-df1d9.firebasestorage.app",
+  messagingSenderId: "614986646190",
+  appId: "1:614986646190:web:8f145884c24e34890da33f",
+  measurementId: "G-WNKGLGC5DD"
 };
 
 // --- ADDED: Initialize Firebase and Auth ---
